@@ -2,8 +2,8 @@
 
 An intelligent chatbot built with Streamlit, LangChain, and Google Gemini. This assistant allows users to search a real-estate dataset using natural language. It leverages **Retrieval-Augmented Generation (RAG)** to fetch the most relevant properties from a local FAISS vector database and uses an LLM to explain why the properties match the user's criteria.
 
-## 🎥 Application Demo
-![App Demo](assets/demo.webp)
+## 🌐 Live Application
+*The application is currently being deployed. Link coming soon!*
 
 ## 🚀 Features
 - **Natural Language Search**: Ask questions like *"Find me a 2BHK under $200k in the CollgCr neighborhood."*
