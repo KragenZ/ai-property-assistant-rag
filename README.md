@@ -2,6 +2,9 @@
 
 An intelligent chatbot built with Streamlit, LangChain, and Google Gemini. This assistant allows users to search a real-estate dataset using natural language. It leverages **Retrieval-Augmented Generation (RAG)** to fetch the most relevant properties from a local FAISS vector database and uses an LLM to explain why the properties match the user's criteria.
 
+## 🎥 Application Demo
+![App Demo](assets/demo.webp)
+
 ## 🚀 Features
 - **Natural Language Search**: Ask questions like *"Find me a 2BHK under $200k in the CollgCr neighborhood."*
 - **RAG Architecture**: Uses HuggingFace embeddings (`all-MiniLM-L6-v2`) to embed property descriptions into a FAISS vector store. 
@@ -15,6 +18,12 @@ An intelligent chatbot built with Streamlit, LangChain, and Google Gemini. This 
 - **FAISS** (Local Vector Database)
 - **HuggingFace Sentence Transformers** (Embeddings)
 - **Google Generative AI / Gemini** (LLM)
+
+## 🧠 Architecture Flow
+1. **Data Ingestion**: A pre-processed real-estate dataset (`housing_clean.csv`) is loaded. Each row is converted into a rich text description.
+2. **Embedding & Indexing**: The `all-MiniLM-L6-v2` model converts these descriptions into vector embeddings, which are stored locally using **FAISS**.
+3. **Retrieval**: When a user asks a question, their query is embedded. FAISS performs a similarity search to retrieve the top 5 most relevant properties.
+4. **Generation**: The user's query and the retrieved properties are passed as context to **Google Gemini** via a custom Prompt Template. Gemini generates a conversational, reasoning-based response.
 
 ## ⚙️ Setup & Installation
 
