@@ -26,8 +26,16 @@ st.markdown("""
         box-shadow: 0 2px 6px rgba(0,0,0,0.07);
     }
     .retrieved-card {
-        background: #eef2ff; border-radius: 8px; padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem; border: 1px solid #c7d2fe;
+        background: #eef2ff;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #c7d2fe;
+        color: #1a1a2e !important;
+        font-size: 0.9rem;
+    }
+    .retrieved-card b {
+        color: #4338ca !important;
     }
     .example-btn { cursor: pointer; }
     .stChatMessage { border-radius: 12px !important; }
