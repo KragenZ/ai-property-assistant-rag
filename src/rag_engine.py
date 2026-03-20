@@ -15,48 +15,50 @@ VECTORSTORE_DIR = os.path.join(os.path.dirname(__file__), "..", "faiss_index")
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 def get_rag_chain():
-    # If vectorstore doesn't exist, we can't answer (should be handled in app)
     if not os.path.exists(VECTORSTORE_DIR):
         print("Vectorstore not built yet.")
         return None
-        
+
     print("Loading vectorstore...")
     vectorstore = FAISS.load_local(VECTORSTORE_DIR, embeddings, allow_dangerous_deserialization=True)
-    
+
     # Create the retriever (fetch top 5 matching properties)
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
-    
-    # Initialize the LLM (Gemini)
+
+    # Initialize Gemini LLM
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
         temperature=0.3
     )
-    
-    # Define our Prompt
-    template = """You are an AI Property Assistant. Your job is to help the user find a suitable property based on their query.
-You have retrieved the following property listings from our database that match the user's request. 
 
-Context Properties Data:
+    # Improved prompt that handles conversation context and avoids markdown code blocks
+    template = """You are a friendly and professional AI Property Assistant helping users find the right home.
+
+Below are the top property listings retrieved from our database that are semantically similar to the user's query.
+
+--- Retrieved Properties ---
 {context}
+----------------------------
 
-User Query: {question}
+{question}
 
 Instructions:
-1. Answer the user's query in a friendly and conversational way.
-2. Recommend the best matching properties from the context provided above.
-3. If the context doesn't contain exactly what they want, suggest the closest matches and explain why.
-4. Provide a clear reason for why a property matches (e.g., "This 2BHK in CollgCr is a great match because it is priced at $150k...").
-5. Do NOT make up properties that are not in the context.
+1. Be conversational, friendly and concise.
+2. Recommend the best 2-3 matching properties from the context above with a clear reason why each is a good match.
+3. If the user is asking a follow-up question, refer to the conversation history provided.
+4. If no properties match exactly, recommend the closest options and explain why.
+5. Do NOT invent properties not listed above.
+6. Use plain text bullet points only. Do NOT use code blocks or backtick formatting in your response.
 
-Response formatting: use bullet points for listing properties. Be helpful and professional.
-"""
+Your response:"""
+
     custom_rag_prompt = PromptTemplate.from_template(template)
-    
+
     def format_docs(docs):
-        output = []
-        for i, doc in enumerate(docs):
-            output.append(f"Property {i+1}:\n{doc.page_content}\n")
-        return "\n".join(output)
+        return "\n\n".join(
+            f"Property {i+1}: {doc.page_content}"
+            for i, doc in enumerate(docs)
+        )
 
     # Build the LangChain Runnable sequence
     rag_chain = (
@@ -65,5 +67,5 @@ Response formatting: use bullet points for listing properties. Be helpful and pr
         | llm
         | StrOutputParser()
     )
-    
+
     return rag_chain, retriever

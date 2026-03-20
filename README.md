@@ -1,63 +1,118 @@
 # 🏠 AI Property Assistant (LLM + RAG)
 
-An intelligent chatbot built with Streamlit, LangChain, and Google Gemini. This assistant allows users to search a real-estate dataset using natural language. It leverages **Retrieval-Augmented Generation (RAG)** to fetch the most relevant properties from a local FAISS vector database and uses an LLM to explain why the properties match the user's criteria.
+An intelligent property search chatbot built with **Streamlit**, **LangChain**, and **Google Gemini**. Users can search a real-estate dataset using natural language. The system uses **Retrieval-Augmented Generation (RAG)** to find semantically relevant properties and generate grounded, explainable answers.
 
 ## 🌐 Live Application
 **[▶ Try it live on Streamlit](https://ai-property-assistant-rag-8za8yz32sjafid8qigpxdc.streamlit.app/)**
 
+---
+
+## ⚙️ How It Works
+
+```
+User Query
+    │
+    ▼
+[Embed with all-MiniLM-L6-v2]   ← free local HuggingFace model
+    │
+    ▼
+[FAISS Vector Search]            ← cosine similarity over 500 properties
+    │
+    ▼
+[Top-5 Context Retrieved]        ← shown to user in the UI
+    │
+    ▼
+[Gemini LLM + RAG Prompt]        ← property context injected into prompt
+    │
+    ▼
+[Grounded Answer + Reasoning]    ← "This matches because..."
+```
+
+The system also evaluates each response with a **relevance score** (keyword overlap between the query and retrieved context) and shows retrieval + generation latency in real time.
+
+---
+
 ## 🚀 Features
-- **Natural Language Search**: Ask questions like *"Find me a 2BHK under $200k in the CollgCr neighborhood."*
-- **RAG Architecture**: Uses HuggingFace embeddings (`all-MiniLM-L6-v2`) to embed property descriptions into a FAISS vector store. 
-- **LLM Reasoning**: Uses Google's `gemini-2.5-flash` model to analyze the retrieved properties and formulate a conversational response.
-- **Interactive UI**: Built entirely in Python using Streamlit for an easy-to-use chat interface.
+
+| Feature | Description |
+|---|---|
+| 🔍 **Natural Language Search** | Ask anything: *"Find cheap houses with 3 bedrooms in NAmes"* |
+| 🧠 **RAG Architecture** | FAISS + HuggingFace embeddings for fast vector retrieval |
+| 🤖 **LLM Reasoning** | Gemini explains *why* each property matches your criteria |
+| 💬 **Conversation Memory** | Follow-up questions aware of prior context |
+| 📊 **Evaluation Metrics** | Relevance score, retrieval time, generation time per query |
+| 🗂 **Retrieval Panel** | See exactly which properties were retrieved from the database |
+
+---
+
+## 💡 Example Queries
+- `"Find me a cheap house under $150k"`
+- `"Best houses with 3 bedrooms in NAmes"`
+- `"Find a 2BHK under $200k in CollgCr"`
+- `"Largest house I can get in Sawyer?"`
+- `"Show me houses newer than 10 years old"`
+
+---
 
 ## 🛠 Tech Stack
-- **Python** 3.x
-- **Streamlit** (Frontend Chat UI)
-- **LangChain** (RAG Orchestration)
-- **FAISS** (Local Vector Database)
-- **HuggingFace Sentence Transformers** (Embeddings)
-- **Google Generative AI / Gemini** (LLM)
 
-## 🧠 Architecture Flow
-1. **Data Ingestion**: A pre-processed real-estate dataset (`housing_clean.csv`) is loaded. Each row is converted into a rich text description.
-2. **Embedding & Indexing**: The `all-MiniLM-L6-v2` model converts these descriptions into vector embeddings, which are stored locally using **FAISS**.
-3. **Retrieval**: When a user asks a question, their query is embedded. FAISS performs a similarity search to retrieve the top 5 most relevant properties.
-4. **Generation**: The user's query and the retrieved properties are passed as context to **Google Gemini** via a custom Prompt Template. Gemini generates a conversational, reasoning-based response.
+| Layer | Technology |
+|---|---|
+| Frontend | Streamlit |
+| Orchestration | LangChain |
+| Embeddings | HuggingFace `all-MiniLM-L6-v2` |
+| Vector Database | FAISS (local) |
+| LLM | Google Gemini (`gemini-2.5-flash`) |
+| Dataset | Ames Housing Dataset (500 properties) |
+
+---
+
+## 📁 Project Structure
+
+```
+ai-property-assistant-rag/
+├── app.py                  # Streamlit UI + RAG pipeline integration
+├── src/
+│   ├── vectorstore.py      # Data processing + FAISS index generation
+│   └── rag_engine.py       # LLM chain, retriever, prompt template
+├── data/
+│   └── housing_clean.csv   # Pre-processed housing dataset
+├── faiss_index/            # Generated FAISS vector store
+├── requirements.txt
+└── .env                    # API keys (not committed)
+```
+
+---
 
 ## ⚙️ Setup & Installation
 
 **1. Clone the repository**
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/KragenZ/ai-property-assistant-rag.git
 cd ai-property-assistant-rag
 ```
 
 **2. Create a virtual environment and install dependencies**
 ```bash
 python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On Mac/Linux:
-source venv/bin/activate
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux
 
 pip install -r requirements.txt
 ```
 
 **3. Configure API Keys**
-Create a `.env` file in the root of the project and add your Google Gemini API key:
 ```env
+# .env
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 **4. Generate the FAISS Vector Database**
-Before running the app, you need to generate embeddings for the dataset.
 ```bash
 python src/vectorstore.py
 ```
-*This will read `data/housing_clean.csv`, generate descriptions, and output the FAISS index to `faiss_index/`.*
 
-**5. Start the Streamlit Application**
+**5. Run the Application**
 ```bash
 streamlit run app.py
 ```
